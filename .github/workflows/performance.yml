@@ -1,0 +1,126 @@
+name: Performance
+
+on:
+  workflow_dispatch:
+    inputs:
+      simulation:
+        description: "Simulation class to run"
+        required: true
+        default: MixedWorkloadSimulation
+        type: choice
+        options:
+          - MixedWorkloadSimulation
+          - SearchOnlySimulation
+          - CheckoutFlowSimulation
+          - all
+      profile:
+        description: "Load profile (smoke|rampup|stress|spike|soak)"
+        required: true
+        default: smoke
+        type: choice
+        options: [smoke, rampup, stress, spike, soak]
+      base_url:
+        description: "Target base URL (leave blank to use mock server)"
+        required: false
+        default: ""
+      users:
+        description: "Total users (for rampup/soak)"
+        required: false
+        default: "10"
+  schedule:
+    # Nightly smoke run at 18:00 UTC (03:00 JST)
+    - cron: "0 18 * * *"
+  pull_request:
+    paths:
+      - "build.sbt"
+      - "project/**"
+      - "src/test/**"
+      - "ci/**"
+      - ".github/workflows/performance.yml"
+
+jobs:
+  smoke:
+    name: Compile + smoke (${{ github.event.inputs.simulation || 'MixedWorkloadSimulation' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SIMULATION: ${{ github.event.inputs.simulation || 'MixedWorkloadSimulation' }}
+      LOAD_PROFILE: ${{ github.event.inputs.profile || 'smoke' }}
+      USERS: ${{ github.event.inputs.users || '10' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Cache sbt
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.sbt
+            ~/.cache/coursier
+            ~/.ivy2/cache
+          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt', 'project/build.properties', 'project/plugins.sbt') }}
+          restore-keys: |
+            ${{ runner.os }}-sbt-
+
+      - name: Setup sbt
+        uses: sbt/setup-sbt@v1
+
+      - name: Compile
+        run: sbt -v "Test / compile"
+
+      - name: Resolve target URL
+        id: target
+        run: |
+          input_url='${{ github.event.inputs.base_url }}'
+          configured_url='${{ vars.PERF_BASE_URL }}'
+          if [ -n "$input_url" ]; then
+            echo "url=$input_url" >> "$GITHUB_OUTPUT"
+            echo "use_mock=false" >> "$GITHUB_OUTPUT"
+          elif [ -n "$configured_url" ]; then
+            echo "url=$configured_url" >> "$GITHUB_OUTPUT"
+            echo "use_mock=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=http://127.0.0.1:8080" >> "$GITHUB_OUTPUT"
+            echo "use_mock=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Start mock server
+        if: steps.target.outputs.use_mock == 'true'
+        run: |
+          nohup python3 ci/mock_server.py 8080 >mock.log 2>&1 &
+          echo $! > mock.pid
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8080/items >/dev/null 2>&1; then
+              echo "mock ready"; break
+            fi
+            sleep 0.5
+          done
+
+      - name: Run Gatling simulation
+        env:
+          BASE_URL: ${{ steps.target.outputs.url }}
+        run: |
+          if [ "${SIMULATION}" = "all" ]; then
+            sbt -v "Gatling/test"
+          else
+            sbt -v "Gatling/testOnly simulations.${SIMULATION}"
+          fi
+
+      - name: Stop mock server
+        if: steps.target.outputs.use_mock == 'true' && always()
+        run: |
+          if [ -f mock.pid ]; then kill "$(cat mock.pid)" 2>/dev/null || true; fi
+
+      - name: Upload Gatling reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatling-reports-${{ env.SIMULATION }}-${{ env.LOAD_PROFILE }}
+          path: target/gatling/**
+          if-no-files-found: ignore
+          retention-days: 14
