@@ -22,3 +22,5 @@ jobs:
           preset: 'angular'
           tag-prefix: 'v'
           output-file: 'CHANGELOG.md'
+          skip-version-file: 'true'
+          skip-commit: 'false'
