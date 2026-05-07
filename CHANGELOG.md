@@ -1,21 +1,11 @@
-# Changelog
+# 0.1.0 (2026-05-07)
 
-All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+### Bug Fixes
 
-## [Unreleased]
+* **ci:** grant write permissions to changelog action ([5e2b82a](https://github.com/jacobryuu/gatling-demo/commit/5e2b82a84bc5c23891b7cdaaca302828993de779))
+* **ci:** skip version file check in changelog action ([792af6d](https://github.com/jacobryuu/gatling-demo/commit/792af6de824d17493d48f6a34ee7d48b112fcc25))
+* correct the action name for changelog generation ([0abb09d](https://github.com/jacobryuu/gatling-demo/commit/0abb09d6a72fa084d36009bc6b218f0efd33c4b8))
 
-### Added
-- Real-time Prometheus monitoring via Graphite protocol.
-- Docker Compose for local development (Mock Server, Prometheus, Graphite Exporter).
-- `scalafmt` for automatic code formatting.
-- `MUnit` for unit testing support logic.
-- `GEMINI.md` for project instructions and architecture documentation.
 
-### Changed
-- Upgraded Gatling to 3.15.0 and `gatling-sbt` to 4.18.1.
-- Enhanced `gatling.conf` with production-ready tuning (DNS, connection pooling).
-- Excluded IDE metadata (`.idea/`) from repository.
-- Updated `README.md` with new features and quickstart instructions.
+
