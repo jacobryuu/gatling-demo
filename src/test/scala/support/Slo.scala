@@ -1,13 +1,12 @@
 package support
 
-import io.gatling.core.Predef._
 import io.gatling.commons.stats.assertion.Assertion
+import io.gatling.core.Predef._
 
-/**
- * Standard SLO assertions builder.
- *
- * Each Simulation calls `.assertions(Slo.all: _*)` after `setUp(...)`.
- */
+/** Standard SLO assertions builder.
+  *
+  * Each Simulation calls `.assertions(Slo.all: _*)` after `setUp(...)`.
+  */
 object Slo {
 
   def all: Seq[Assertion] = Seq(

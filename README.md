@@ -9,26 +9,47 @@ Gatlingベースの性能試験テンプレート。
 - sbt 1.9.x (`project/build.properties` で固定)
 - Gatling 3.11.x / Scala 2.13.x (`build.sbt` で管理、Scala 3対応は後述)
 
+## 監視連携 (Prometheus)
+
+本テンプレートは Prometheus へのリアルタイムメトリクス送信に対応しています。
+
+1. **スタックの起動**:
+   ```bash
+   docker-compose up -d
+   ```
+   - Mock Server: http://localhost:8080
+   - Prometheus: http://localhost:9090
+   - Graphite Exporter: http://localhost:9108 (Gatlingからのデータ受口)
+
+2. **テスト実行**:
+   Gatlingが `localhost:2003` (Graphite Exporter) にデータを送り、Prometheusがそれを収集します。
+
+3. **メトリクスの確認**:
+   Prometheus UI で `gatling_request_metrics` 等のクエリを実行してリアルタイムの推移を確認できます。
+
 ## クイックスタート
 
 ```bash
-# コンパイル
-sbt Test/compile
+# フォーマットチェック
+sbt scalafmtCheckAll
+
+# ユニットテスト (Config等のロジック検証)
+sbt test
+
+# コンパイル (Gatling)
+sbt Gatling/compile
 
 # Smokeテスト (CIや疎通確認向け)
-LOAD_PROFILE=smoke BASE_URL=https://staging.example.com \
+LOAD_PROFILE=smoke BASE_URL=http://localhost:8080 \
   sbt "Gatling/testOnly simulations.MixedWorkloadSimulation"
-
-# レポートは target/gatling/ 配下に生成されます
-open target/gatling/*/index.html
 ```
 
-ローカルで疎通確認するだけなら、付属のスタブサーバーを起動できます:
+ローカルで疎通確認するなら、Docker Compose でスタブサーバーを起動できます:
 
 ```bash
-python3 ci/mock_server.py 8080 &
-BASE_URL=http://127.0.0.1:8080 LOAD_PROFILE=smoke \
-  sbt "Gatling/testOnly simulations.MixedWorkloadSimulation"
+docker-compose up -d
+# 実行後、上記 Smokeテスト コマンドを実行
+docker-compose down
 ```
 
 ## Simulation 一覧

@@ -6,12 +6,11 @@ import io.gatling.core.structure.ScenarioBuilder
 
 import scala.concurrent.duration._
 
-/**
- * Injection profile factories.
- *
- * Each factory produces an injection sequence shaped by [[Config]] for a single
- * scenario. Simulations combine them per scenario.
- */
+/** Injection profile factories.
+  *
+  * Each factory produces an injection sequence shaped by [[Config]] for a single scenario.
+  * Simulations combine them per scenario.
+  */
 object LoadProfiles {
 
   /** Round to at least 1, weighted from a total user count. */
@@ -48,7 +47,7 @@ object LoadProfiles {
       case "stress" => stress(scn, weight)
       case "spike"  => spike(scn, weight)
       case "soak"   => soak(scn, weight)
-      case other    =>
+      case other =>
         println(s"[gatling-demo] Unknown LOAD_PROFILE='$other', falling back to smoke")
         smoke(scn, weight)
     }

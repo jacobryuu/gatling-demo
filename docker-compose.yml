@@ -1,0 +1,35 @@
+services:
+  mock-server:
+    image: python:3.11-slim
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./ci/mock_server.py:/app/mock_server.py
+    working_dir: /app
+    command: python3 mock_server.py 8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/items"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Bridge between Gatling (Graphite) and Prometheus
+  graphite-exporter:
+    image: prom/graphite-exporter:v0.15.0
+    ports:
+      - "2003:2003"   # Graphite line protocol (TCP)
+      - "9108:9108"   # Prometheus metrics endpoint
+    command:
+      - "--graphite.mapping-config=/etc/graphite-exporter/mapping.conf"
+    volumes:
+      - ./ci/graphite_mapping.conf:/etc/graphite-exporter/mapping.conf
+
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./ci/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=15d"

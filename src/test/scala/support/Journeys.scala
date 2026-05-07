@@ -5,14 +5,13 @@ import io.gatling.core.structure.ChainBuilder
 import io.gatling.http.Predef._
 import io.gatling.http.request.builder.HttpRequestBuilder
 
-/**
- * Reusable user-behavior chains.
- *
- * Endpoints are placeholders ("/login", "/items", "/items/{id}", "/transactions").
- * Replace paths/payloads to match the target API. Sessions persist Cookies
- * automatically; tokens are stored in the Gatling session via checks and applied
- * per-request as headers when AUTH_MODE=token (EL evaluated at request time).
- */
+/** Reusable user-behavior chains.
+  *
+  * Endpoints are placeholders ("/login", "/items", "/items/{id}", "/transactions"). Replace
+  * paths/payloads to match the target API. Sessions persist Cookies automatically; tokens are
+  * stored in the Gatling session via checks and applied per-request as headers when AUTH_MODE=token
+  * (EL evaluated at request time).
+  */
 object Journeys {
 
   private def withAuth(req: HttpRequestBuilder): HttpRequestBuilder =
@@ -24,7 +23,8 @@ object Journeys {
   val login: ChainBuilder = {
     val base = http("Login")
       .post("/login")
-      .body(StringBody("""{"username":"#{username}","password":"#{password}"}""")).asJson
+      .body(StringBody("""{"username":"#{username}","password":"#{password}"}"""))
+      .asJson
       .check(status.in(200, 201, 204))
 
     val withTokenCheck =
@@ -67,9 +67,12 @@ object Journeys {
       withAuth(
         http("Create transaction")
           .post("/transactions")
-          .body(StringBody(
-            """{"itemId":"#{itemId}","quantity":#{quantity},"idempotencyKey":"#{idempotencyKey}"}"""
-          )).asJson
+          .body(
+            StringBody(
+              """{"itemId":"#{itemId}","quantity":#{quantity},"idempotencyKey":"#{idempotencyKey}"}"""
+            )
+          )
+          .asJson
       )
         .check(status.in(200, 201, 202))
     )

@@ -3,16 +3,18 @@ package support
 import scala.concurrent.duration._
 import scala.util.Try
 
-/**
- * Centralized configuration loaded from environment variables / system properties.
- * All performance test parameters can be overridden without modifying source.
- */
+/** Centralized configuration loaded from environment variables / system properties. All performance
+  * test parameters can be overridden without modifying source.
+  */
 object Config {
 
   // ---- Helpers ---------------------------------------------------------------
 
   private def env(key: String): Option[String] =
-    Option(System.getProperty(key)).orElse(Option(System.getenv(key))).map(_.trim).filter(_.nonEmpty)
+    Option(System.getProperty(key))
+      .orElse(Option(System.getenv(key)))
+      .map(_.trim)
+      .filter(_.nonEmpty)
 
   private def envOr(key: String, default: String): String = env(key).getOrElse(default)
 
@@ -61,10 +63,9 @@ object Config {
 
   // ---- Feeders ---------------------------------------------------------------
 
-  /**
-   * Path to the users CSV resource. Override via `USERS_CSV` to inject
-   * CI-secret-backed credentials at runtime instead of the dummy file in VCS.
-   */
+  /** Path to the users CSV resource. Override via `USERS_CSV` to inject CI-secret-backed
+    * credentials at runtime instead of the dummy file in VCS.
+    */
   val usersCsv: String = envOr("USERS_CSV", "feeders/users.csv")
 
   override def toString: String =

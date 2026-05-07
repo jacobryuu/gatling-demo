@@ -18,6 +18,7 @@ javacOptions := Seq(
 )
 
 libraryDependencies ++= Seq(
-  "io.gatling.highcharts" % "gatling-charts-highcharts" % "3.11.5" % "test,it",
-  "io.gatling"            % "gatling-test-framework"    % "3.11.5" % "test,it"
+  "io.gatling.highcharts" % "gatling-charts-highcharts" % "3.15.0" % "test,it",
+  "io.gatling"            % "gatling-test-framework"    % "3.15.0" % "test,it",
+  "org.scalameta"        %% "munit"                     % "1.0.0"  % Test
 )

@@ -8,7 +8,7 @@ project/project/
 *.log
 
 # Keep IDE metadata for this demo project
-# .idea/
+.idea/
 
 # Gatling outputs
 results/
