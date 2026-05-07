@@ -9,16 +9,20 @@ on:
 jobs:
   changelog:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Conventional Changelog Action
-        uses: ConventionalChangelog/conventional-changelog-action@v5
+        uses: TriPSs/conventional-changelog-action@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           git-message: 'chore(release): {version} [skip ci]'
           preset: 'angular'
           tag-prefix: 'v'
           output-file: 'CHANGELOG.md'
+          skip-version-file: 'true'
+          skip-commit: 'false'
