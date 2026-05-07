@@ -15,7 +15,7 @@ jobs:
           fetch-depth: 0
 
       - name: Conventional Changelog Action
-        uses: ConventionalChangelog/conventional-changelog-action@v5
+        uses: TriPSs/conventional-changelog-action@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           git-message: 'chore(release): {version} [skip ci]'
