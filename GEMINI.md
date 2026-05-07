@@ -7,11 +7,13 @@
 - **SLO Verification**: Every simulation must apply `support.Slo.all` assertions to ensure CI pass/fail consistency.
 - **Formatting**: Maintain clean Scala code. (Planned: scalafmt integration).
 - **Security**: Never commit real credentials to `src/test/resources/feeders/`. Use environment variables or CI secrets to inject sensitive data.
+- **Commits**: Use **Conventional Commits** (e.g., `feat:`, `fix:`, `chore:`) to support automatic CHANGELOG generation.
 
 ## Workflow
 
 - **Local Verification**: Use `ci/mock_server.py` for smoke testing during development.
 - **CI Integration**: The GitHub Action workflow is the source of truth for "official" performance runs.
+- **Changelog**: Automatic `CHANGELOG.md` updates are handled by GitHub Actions on push to `main` or `develop`.
 - **Version Management**: Gatling is currently at **3.15.0** and `gatling-sbt` at **4.18.1**.
 
 ## Key Files
